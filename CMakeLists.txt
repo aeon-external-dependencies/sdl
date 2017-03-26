@@ -15,6 +15,10 @@ project(SDL2 C)
 # !!! FIXME:  properly resolved.
 #cmake_policy(SET CMP0042 OLD)
 
+if (MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4018 /wd4267 /wd4311 /wd4312 /wd4996")
+endif ()
+
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
@@ -238,7 +242,7 @@ if(EMSCRIPTEN)
 endif()
 
 if (NOT DEFINED SDL_SHARED_ENABLED_BY_DEFAULT)
-    set(SDL_SHARED_ENABLED_BY_DEFAULT ON)
+    set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
 endif()
 
 set(SDL_SUBSYSTEMS
@@ -1536,6 +1540,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
 set(_INSTALL_LIBS "SDL2main")
 
+set_target_properties(SDL2main PROPERTIES
+                      FOLDER "External/sdl")
+
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES} ${VERSION_SOURCES})
   if(UNIX)
@@ -1562,6 +1569,11 @@ endif()
 if(SDL_STATIC)
   set (BUILD_SHARED_LIBS FALSE)
   add_library(SDL2-static STATIC ${SOURCE_FILES})
+  target_include_directories(SDL2-static PUBLIC include)
+
+  set_target_properties(SDL2-static PROPERTIES
+                        FOLDER "External/sdl")
+
   set_target_properties(SDL2-static PROPERTIES OUTPUT_NAME "SDL2")
   set_target_properties(SDL2-static PROPERTIES POSITION_INDEPENDENT_CODE ${SDL_STATIC_PIC})
   if(MSVC)
